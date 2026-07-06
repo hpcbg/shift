@@ -17,17 +17,16 @@
   html,body{margin:0}
   body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
   .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
-  header{background:var(--ink);color:#eaf1f4;padding:18px 26px 20px;border-bottom:3px solid var(--heat)}
+  /* compact header */
+  header{background:var(--ink);color:#eaf1f4;padding:11px 26px 12px;border-bottom:3px solid var(--heat)}
   header .eyebrow{color:#7fa7bb}
-  header h1{margin:6px 0 4px;font-size:21px;font-weight:650}
-  header p{margin:0;color:#a9c0cc;max-width:80ch;font-size:13px}
-  .chip{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#0e1a22;
-    background:#e7b47a;border-radius:2px;padding:4px 8px;font-weight:600}
+  header h1{margin:3px 0 2px;font-size:19px;font-weight:650}
+  header p{margin:0;color:#a9c0cc;font-size:12.5px}
   .wrap{display:grid;grid-template-columns:300px 1fr;align-items:start}
   @media(max-width:960px){.wrap{grid-template-columns:1fr}}
   aside{background:var(--card);border-right:1px solid var(--line);padding:16px 18px 28px;position:sticky;top:0}
   @media(max-width:960px){aside{position:static;border-right:none;border-bottom:1px solid var(--line)}}
-  main{padding:18px 22px 48px;min-width:0}
+  main{padding:16px 22px 44px;min-width:0}
   .group{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
   .group h2{font-size:11px;margin:0 0 10px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
   .kv{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;margin:3px 0}
@@ -55,7 +54,7 @@
     linear-gradient(0deg,#eef4f6,#f7fafb);border:1px solid var(--line-soft);border-radius:4px;overflow:hidden}
   .node{position:absolute;transform:translate(-50%,-50%);width:15%;min-width:120px;
     border-radius:6px;border:2px solid var(--line);background:#fff;padding:6px 8px;cursor:pointer;
-    box-shadow:0 1px 3px rgba(20,40,60,.08);transition:box-shadow .1s}
+    box-shadow:0 1px 3px rgba(20,40,60,.08)}
   .node:hover{box-shadow:0 2px 8px rgba(20,40,60,.22)}
   .node.sel{outline:2px solid var(--ink);outline-offset:1px}
   .node .n{font-weight:650;font-size:11.5px;line-height:1.15}
@@ -77,20 +76,26 @@
   .b-non_participating{background:#e3e9ec;color:#5a6a72}
   .st-fault{border-color:#7a1f16} .b-fault{background:#e3b7b1;color:#5f160d}
   /* kpi */
-  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:8px}
   @media(max-width:1150px){.kpis{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:10px 11px;border-top:2px solid var(--heat)}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:9px 11px;border-top:2px solid var(--heat)}
   .kpi .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
-  .kpi .v{font-family:var(--mono);font-size:20px;font-weight:650;margin-top:2px}
+  .kpi .v{font-family:var(--mono);font-size:19px;font-weight:650;margin-top:2px}
   .kpi .u{font-size:11px;color:var(--ink-soft)}
   .kpi.good{border-top-color:var(--ok)} .kpi.good .v{color:var(--ok)}
   .kpi.bad{border-top-color:var(--warn)} .kpi.bad .v{color:var(--warn)}
-  .chart{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:12px 14px 8px;margin-top:14px}
+  /* charts — FIXED-HEIGHT wrappers to prevent responsive resize/grow loops */
+  .chart{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:12px 14px 10px;margin-top:14px}
   .chart h3{margin:0 0 2px;font-size:13.5px}
-  .chart .sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px}
+  .chart .sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:8px}
+  .chart-canvas{position:relative;width:100%}
+  .chart-canvas canvas{display:block;width:100% !important;height:100% !important}
+  .cc-ctx{height:220px;min-height:220px;max-height:220px}
+  .cc-dem{height:280px;min-height:280px;max-height:280px}
+  .cc-tin{height:260px;min-height:260px;max-height:260px}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  @media(max-width:1100px){.cols{grid-template-columns:1fr}}
   table{width:100%;border-collapse:collapse;font-size:12px}
   th,td{text-align:right;padding:5px 7px;border-bottom:1px solid var(--line-soft)}
   th:first-child,td:first-child{text-align:left}
@@ -111,17 +116,14 @@
   .legend i{width:11px;height:11px;border-radius:3px;border:2px solid}
   .note{font-size:11px;color:var(--ink-soft);font-family:var(--mono);margin-top:6px}
   #status{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);margin-top:6px}
-  footer{padding:16px 26px 30px;color:var(--ink-soft);font-size:11px;border-top:1px solid var(--line)}
+  footer{padding:14px 26px 28px;color:var(--ink-soft);font-size:11px;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
 <header>
   <div class="eyebrow">SHIFT · Smart Heat Interoperability &amp; Flexibility Technology</div>
   <h1>Pre-pilot flexibility simulator</h1>
-  <p>Synthetic six-building district-heating portfolio. Verifies the thermal-balance, flexibility-assessment,
-     comfort and rebound logic — and the KPI calculations — before substation connection. Baseline and
-     SHIFT run in parallel from identical initial conditions.</p>
-  <span class="chip">SYNTHETIC · 1R1C space heating · no real Miesto Gijos data · verifies control &amp; KPI logic · not TRL 7 evidence</span>
+  <p>Synthetic six-building district-heating portfolio for thermal-flexibility, comfort, rebound and KPI evaluation before substation integration.</p>
 </header>
 
 <div class="wrap">
@@ -170,18 +172,21 @@
 
     <div class="kpis" id="kpis"></div>
 
-    <div class="cols">
-      <div class="chart"><h3>Outdoor temperature &amp; renewable share</h3>
-        <div class="sub">Daily context. Shaded band = flexibility event; marker = scrubber time.</div>
-        <canvas id="cCtx" height="150"></canvas></div>
-      <div class="chart"><h3>Aggregated heat demand</h3>
-        <div class="sub">Baseline vs SHIFT. Reduced during the event, staggered recovery afterwards.</div>
-        <canvas id="cDem" height="150"></canvas></div>
+    <div class="chart"><h3>Outdoor temperature &amp; renewable share</h3>
+      <div class="sub">Daily context. Shaded band = flexibility event; dashed marker = scrubber time.</div>
+      <div class="chart-canvas cc-ctx"><canvas id="cCtx"></canvas></div>
     </div>
 
-    <div class="chart"><h3>Indoor temperature — comfort protection</h3>
-      <div class="sub">SHIFT per building (solid). Select a building to compare its baseline (dashed) and comfort band.</div>
-      <canvas id="cTin" height="170"></canvas></div>
+    <div class="cols">
+      <div class="chart"><h3>Aggregated heat demand</h3>
+        <div class="sub">Baseline vs SHIFT. Reduced during the event, staggered recovery afterwards.</div>
+        <div class="chart-canvas cc-dem"><canvas id="cDem"></canvas></div>
+      </div>
+      <div class="chart"><h3>Selected-building indoor temperature</h3>
+        <div class="sub" id="tinSub">SHIFT (solid) vs baseline (dashed), scheduled setpoint and comfort band.</div>
+        <div class="chart-canvas cc-tin"><canvas id="cTin"></canvas></div>
+      </div>
+    </div>
 
     <div class="cols">
       <div class="panel"><h3>Flexibility decisions (per building)</h3>
@@ -219,6 +224,9 @@ var COLORS=["#e08533","#1f8fd6","#8e44ad","#3f9d5a","#c0392b","#2b6f8c"];
 var el=function(id){return document.getElementById(id)};
 function fmt(v,d){return (typeof v==="number")?v.toFixed(d==null?1:d):v;}
 function statusClass(s){return "st-"+s;}
+// numeric sanitiser: never let NaN/undefined reach Chart.js
+function num(v){var n=Number(v);return Number.isFinite(n)?n:null;}
+function pts(xs,ys){return xs.map(function(x,i){return {x:num(x),y:num(ys[i])};});}
 
 // ---------- boot ----------
 fetch("/config").then(function(r){return r.json();}).then(function(cfg){
@@ -256,6 +264,7 @@ el("reset").addEventListener("click",function(){
   document.querySelectorAll(".win,.door").forEach(function(c){c.checked=false;});
   el("preheat").checked=true; el("stagger").checked=true; run();
 });
+// scrubber: update ONLY marker/map/detail — never rerun, rebuild, or recreate charts
 el("time").addEventListener("input",function(){IDX=+el("time").value; renderScrub();});
 
 function gather(){
@@ -285,9 +294,11 @@ function onData(){
     var dt=DATA.shift.hours[1]-DATA.shift.hours[0];
     var w=DATA.request_windows[0]; IDX=Math.round(((w.start_h+w.end_h)/2)/dt);
   }
+  IDX=Math.max(0,Math.min(n-1,IDX));
   slider.value=IDX;
+  // ensure a valid selected building before building the temperature chart
+  if(!SEL || !DATA.shift.per_building[SEL]) SEL=DATA.map_state[0].id;
   renderKPIs(); renderCharts(); renderDecisions(); renderPBKpi(); renderAudit();
-  if(!SEL) SEL=DATA.map_state[0].id;
   renderScrub();
 }
 
@@ -315,72 +326,74 @@ function renderKPIs(){
 }
 
 // ---------- charts ----------
-var eventBandPlugin={id:"eventBand",beforeDraw:function(c){
-  if(!DATA||!DATA.request_windows||!DATA.request_windows.length)return;
-  var w=DATA.request_windows[0], xa=c.scales.x, ya=c.chartArea; if(!xa)return;
-  var x0=xa.getPixelForValue(w.start_h), x1=xa.getPixelForValue(w.end_h);
-  var ctx=c.ctx; ctx.save(); ctx.fillStyle="rgba(224,133,51,.09)";
-  ctx.fillRect(x0,ya.top,x1-x0,ya.bottom-ya.top);
-  // scrubber marker
+// event-band + scrubber marker overlay (reads DATA/IDX; drawn on every render/update)
+var overlayPlugin={id:"overlay",afterDraw:function(c){
+  if(!DATA)return;
+  var xa=c.scales.x, area=c.chartArea, ctx=c.ctx; if(!xa||!area)return;
+  if(DATA.request_windows && DATA.request_windows.length){
+    var w=DATA.request_windows[0];
+    var x0=xa.getPixelForValue(w.start_h), x1=xa.getPixelForValue(w.end_h);
+    ctx.save(); ctx.fillStyle="rgba(224,133,51,.09)";
+    ctx.fillRect(x0,area.top,x1-x0,area.bottom-area.top); ctx.restore();
+  }
   var hx=xa.getPixelForValue(DATA.shift.hours[IDX]);
-  ctx.strokeStyle="rgba(19,32,41,.55)"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
-  ctx.beginPath(); ctx.moveTo(hx,ya.top); ctx.lineTo(hx,ya.bottom); ctx.stroke(); ctx.restore();
+  if(Number.isFinite(hx)){
+    ctx.save(); ctx.strokeStyle="rgba(19,32,41,.55)"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(hx,area.top); ctx.lineTo(hx,area.bottom); ctx.stroke(); ctx.restore();
+  }
 }};
-if(window.Chart) Chart.register(eventBandPlugin);
+if(window.Chart) Chart.register(overlayPlugin);
 
-function baseOpts(yTitle,y2){
-  var o={responsive:true,maintainAspectRatio:false,animation:false,
+function baseOpts(yTitle,opt){
+  opt=opt||{};
+  var o={responsive:true,maintainAspectRatio:false,animation:false,resizeDelay:100,
     interaction:{mode:"nearest",intersect:false},
     plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:10}}}},
     scales:{x:{type:"linear",min:0,max:24,ticks:{stepSize:4,font:{size:10}},title:{display:true,text:"hour"}},
             y:{title:{display:true,text:yTitle},ticks:{font:{size:10}}}}};
-  if(y2)o.scales.y2={position:"right",min:0,max:1,grid:{drawOnChartArea:false},title:{display:true,text:"renewable share"}};
+  if(opt.y2)o.scales.y2={position:"right",min:0,max:1,grid:{drawOnChartArea:false},title:{display:true,text:"renewable share"}};
+  if(Number.isFinite(opt.ymin))o.scales.y.min=opt.ymin;
+  if(Number.isFinite(opt.ymax))o.scales.y.max=opt.ymax;
   return o;
 }
-function pts(xs,ys){return xs.map(function(x,i){return {x:x,y:ys[i]};});}
 
 function renderCharts(){
   var H=DATA.shift.hours;
-  // context
-  mk("cCtx","cCtx",{datasets:[
+  mk("cCtx",{datasets:[
       {label:"outdoor °C",data:pts(H,DATA.shift.t_out),borderColor:"#1f8fd6",borderWidth:2,pointRadius:0,yAxisID:"y"},
       {label:"renewable share",data:pts(H,DATA.shift.renewable_share),borderColor:"#3f9d5a",borderWidth:1.6,pointRadius:0,yAxisID:"y2"}
-    ]}, baseOpts("°C",true));
-  // demand
-  mk("cDem","cDem",{datasets:[
+    ]}, baseOpts("°C",{y2:true}));
+  mk("cDem",{datasets:[
       {label:"baseline",data:pts(H,DATA.baseline.aggregated_demand_kw),borderColor:"#9aa9b2",borderWidth:1.6,borderDash:[5,4],pointRadius:0},
       {label:"SHIFT",data:pts(H,DATA.shift.aggregated_demand_kw),borderColor:"#e08533",borderWidth:2.2,pointRadius:0}
-    ]}, baseOpts("heat demand kW",false));
+    ]}, baseOpts("heat demand kW"));
   renderTin();
 }
+
+// Selected-building indoor temperature: SHIFT, baseline, scheduled setpoint, comfort band.
 function renderTin(){
-  var H=DATA.shift.hours, ds=[];
-  DATA.map_state.forEach(function(b,i){
-    var faded=SEL&&b.id!==SEL;
-    ds.push({label:b.name,data:pts(H,DATA.shift.per_building[b.id].tin),
-      borderColor:COLORS[i%COLORS.length],borderWidth:faded?1:2.2,pointRadius:0,
-      borderCapStyle:"round",hidden:false,opacity:1,
-      segment:{},order:faded?2:1});
-    if(faded)ds[ds.length-1].borderColor=hexA(COLORS[i%COLORS.length],.28);
-  });
-  if(SEL){
-    var b=cfgB(SEL);
-    ds.push({label:"baseline("+shortName(SEL)+")",data:pts(H,DATA.baseline.per_building[SEL].tin),
-      borderColor:"#41545f",borderWidth:1.4,borderDash:[5,3],pointRadius:0,order:0});
-    ds.push({label:"comfort min",data:pts([0,24],[b.comfort_minimum_c,b.comfort_minimum_c]),
-      borderColor:"#c0392b",borderWidth:1,borderDash:[2,3],pointRadius:0,order:0});
-    ds.push({label:"comfort max",data:pts([0,24],[b.comfort_maximum_c,b.comfort_maximum_c]),
-      borderColor:"#c0392b",borderWidth:1,borderDash:[2,3],pointRadius:0,order:0});
-  }
-  mk("cTin","cTin",{datasets:ds}, baseOpts("indoor °C",false));
+  if(!SEL || !DATA.shift.per_building[SEL]) return;
+  var H=DATA.shift.hours, b=cfgB(SEL);
+  var sb=DATA.shift.per_building[SEL], bb=DATA.baseline.per_building[SEL];
+  var cmin=num(b.comfort_minimum_c), cmax=num(b.comfort_maximum_c);
+  el("tinSub").textContent=b.name+" — SHIFT (solid) vs baseline (dashed), scheduled setpoint and comfort band.";
+  var ds=[
+    {label:"SHIFT indoor",data:pts(H,sb.tin),borderColor:"#e08533",borderWidth:2.2,pointRadius:0},
+    {label:"baseline indoor",data:pts(H,bb.tin),borderColor:"#41545f",borderWidth:1.4,borderDash:[5,3],pointRadius:0},
+    {label:"scheduled setpoint",data:pts(H,bb.setpoint),borderColor:"#8e44ad",borderWidth:1.2,borderDash:[2,3],pointRadius:0},
+    {label:"comfort min",data:pts([0,24],[cmin,cmin]),borderColor:"#c0392b",borderWidth:1,borderDash:[6,3],pointRadius:0},
+    {label:"comfort max",data:pts([0,24],[cmax,cmax]),borderColor:"#c0392b",borderWidth:1,borderDash:[6,3],pointRadius:0}
+  ];
+  // Y-axis range derived from the selected building's comfort band (always finite)
+  mk("cTin",{datasets:ds}, baseOpts("indoor °C",{ymin:cmin-1,ymax:cmax+1}));
 }
-function mk(key,canvasId,data,opts){
-  if(CH[key]){CH[key].data=data; CH[key].options=opts; CH[key].update(); return;}
-  CH[key]=new Chart(el(canvasId).getContext("2d"),{type:"line",data:data,options:opts});
+
+// create once; thereafter update in place with no animation (never recreate on scrub)
+function mk(canvasId,data,opts){
+  if(CH[canvasId]){CH[canvasId].data=data; CH[canvasId].options=opts; CH[canvasId].update("none"); return;}
+  CH[canvasId]=new Chart(el(canvasId).getContext("2d"),{type:"line",data:data,options:opts});
 }
-function hexA(hex,a){var n=parseInt(hex.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";}
 function cfgB(id){return CFG.buildings.filter(function(b){return b.id===id;})[0];}
-function shortName(id){return cfgB(id).name.split(" ")[0];}
 
 // ---------- decisions & KPI tables ----------
 function decCell(d){return '<span class="dec '+d+'">'+d+'</span>';}
@@ -412,11 +425,12 @@ function renderAudit(){
   }).join("");
 }
 
-// ---------- scrubber-driven map & detail ----------
+// ---------- scrubber-driven map & detail (NO chart rebuild) ----------
 function renderScrub(){
-  var H=DATA.shift.hours, h=H[IDX];
+  var h=DATA.shift.hours[IDX];
   el("clock").textContent=hhmm(h);
   renderMap(); renderDetail();
+  // redraw the scrubber marker only — no animation, no dataset rebuild
   ["cCtx","cDem","cTin"].forEach(function(k){if(CH[k])CH[k].update("none");});
 }
 function hhmm(h){var m=Math.round(h*60),H2=Math.floor(m/60)%24,M=m%60;return (H2<10?"0":"")+H2+":"+(M<10?"0":"")+M;}
@@ -426,16 +440,15 @@ function renderMap(){
   DATA.map_state.forEach(function(b){
     var pb=DATA.shift.per_building[b.id];
     var st=pb.status[IDX], tin=pb.tin[IDX], q=pb.q[IDX];
-    var e=DATA.envelopes[b.id];
     var n=document.createElement("div");
     n.className="node "+statusClass(st)+(SEL===b.id?" sel":"");
     n.style.left=b.map_x+"%"; n.style.top=b.map_y+"%";
     var frac=Math.max(0,Math.min(1,q/(cfgB(b.id).maximum_heat_power_kw)));
     n.innerHTML='<div class="ty">'+b.building_type+'</div><div class="n">'+b.name+'</div>'+
-      '<div class="m"><span>'+tin.toFixed(1)+' °C</span><span>'+q.toFixed(0)+' kW</span></div>'+
+      '<div class="m"><span>'+num(tin).toFixed(1)+' °C</span><span>'+num(q).toFixed(0)+' kW</span></div>'+
       '<div class="bar"><i style="width:'+(frac*100).toFixed(0)+'%"></i></div>'+
       '<span class="badge b-'+st+'">'+st.replace(/_/g," ")+'</span>';
-    n.addEventListener("click",function(){SEL=b.id; renderTin(); renderScrub();});
+    n.addEventListener("click",function(){ SEL=b.id; renderTin(); renderScrub(); });
     mp.appendChild(n);
   });
 }
@@ -451,8 +464,8 @@ function renderDetail(){
     dd("Comfort band",b.comfort_minimum_c+"–"+b.comfort_maximum_c+" °C")+
     dd("Controllable share",(b.controllable_share*100).toFixed(0)+" %")+
     dd("Status @ "+hhmm(DATA.shift.hours[IDX]),pb.status[IDX].replace(/_/g," "))+
-    dd("Indoor now",pb.tin[IDX].toFixed(1)+" °C")+
-    dd("Heat demand now",pb.q[IDX].toFixed(1)+" kW")+
+    dd("Indoor now",num(pb.tin[IDX]).toFixed(1)+" °C")+
+    dd("Heat demand now",num(pb.q[IDX]).toFixed(1)+" kW")+
     dd("Decision",e.decision)+
     dd("Available / committed",fmt(e.available_kw,1)+" / "+fmt(e.committed_kw,1)+" kW")+
     dd("Delivered flexibility",k?fmt(k.delivered_flexibility_kw,1)+" kW":"—")+
