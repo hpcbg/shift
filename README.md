@@ -116,6 +116,12 @@ vendored offline in `web/chart.umd.js`.
 | Administration Building | municipal | **participation disabled** | **reject** |
 | Municipal School | school | tight comfort band | comfort-limited → **partial** |
 
+Weather: a **synthetic "Ljubljana-inspired cold winter day"** hourly outdoor
+temperature (night minimum ≈ −5 °C around 05:00–06:00, daytime maximum ≈ +3 °C
+around 15:00), linearly interpolated at the 2-minute step. It is not a measured
+average and can be swapped for measured or forecast data (see
+[Weather profile](#weather-profile)).
+
 Timeline: a high-renewable **discounted price offer 14:00–17:00** (suitable
 buildings preheat within their comfort maximum), then a portfolio
 **peak-reduction request 18:00–20:00** with per-building accept/partial/reject,
@@ -139,11 +145,11 @@ python -m shift_sim
 
 | KPI | Default scenario result |
 |---|---:|
-| Peak reduction | 26.3 kW / 15.1% |
-| Shifted thermal energy | 48.1 kWh |
+| Peak reduction | 24.5 kW / 17.4% |
+| Shifted thermal energy | 49.0 kWh |
 | Rebound ratio | 0.22×, target ≤ 0.8 |
-| Renewable thermal-energy increase | +38.4 kWh |
-| Total customer savings | +€5.10 |
+| Renewable thermal-energy increase | +38.3 kWh |
+| Total customer savings | +€5.14 |
 | Flexibility decisions | 1 accepted / 4 partial / 1 rejected |
 | Comfort violations | 0 |
 | Audit completeness | 100% |
@@ -153,9 +159,9 @@ Residential Riverside, Business Centre and Municipal School partially accept
 the request. Administration Building rejects it because flexibility
 participation is disabled.
 
-The simulated portfolio reduces the selected peak by **15.1%** without
+The simulated portfolio reduces the selected peak by **17.4%** without
 violating the configured comfort limits. Preheating during the low-price,
-higher-renewable period shifts **38.4 kWh** of thermal consumption into a
+higher-renewable period shifts **38.3 kWh** of thermal consumption into a
 higher-renewable period, while staggered recovery keeps the rebound ratio at
 **0.22**.
 
@@ -197,6 +203,19 @@ Single cost formula, used everywhere: `cost_eur = energy_kwh * price_eur_per_mwh
 - `config.local.yaml` (git-ignored) — optional machine-local overrides,
   deep-merged onto the committed config. Copy `config.local.yaml.example` to
   start.
+
+### Weather profile
+
+Outdoor temperature is a **synthetic** hourly profile under `weather.hourly_temperature_c`
+— a representative cold winter day (the default is *"Ljubljana-inspired cold
+winter day"*), **not** a measured hourly average. The engine linearly
+interpolates between the ordered `{hour, value}` points at the 2-minute step
+(hours must be strictly increasing, values finite, and cover hour 0 through 24).
+
+The **same profile interface accepts measured or forecast data**: replace the
+points with your own hourly series and nothing else changes. If
+`hourly_temperature_c` is omitted, the engine falls back to the legacy sinusoidal
+profile (`coldest_c` / `coldest_hour` / `daily_swing_c`).
 
 ---
 

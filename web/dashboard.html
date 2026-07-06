@@ -233,11 +233,20 @@ fetch("/config").then(function(r){return r.json();}).then(function(cfg){
   CFG=cfg; buildConsole(); el("status").textContent="ready — press Run simulation."; run();
 }).catch(function(e){el("status").textContent="config error: "+e;});
 
+// derive outdoor-temperature bounds from the configured profile (hourly or legacy)
+function weatherBounds(w){
+  if(w.hourly_temperature_c && w.hourly_temperature_c.length){
+    var vals=w.hourly_temperature_c.map(function(p){return num(p.value);}).filter(function(v){return v!=null;});
+    return {name:w.profile_name||"hourly profile", min:Math.min.apply(null,vals), max:Math.max.apply(null,vals)};
+  }
+  return {name:w.profile_name||"sinusoidal", min:num(w.coldest_c), max:num(w.coldest_c)+num(w.daily_swing_c)};
+}
 function buildConsole(){
-  var w=CFG.weather, r=CFG.renewable;
+  var w=CFG.weather, r=CFG.renewable, wb=weatherBounds(w);
   el("conditions").innerHTML=
-    kv("Coldest outdoor", w.coldest_c.toFixed(1)+" °C")+
-    kv("Daily swing", w.daily_swing_c.toFixed(1)+" °C")+
+    kv("Weather profile", wb.name)+
+    kv("Night minimum", wb.min.toFixed(1)+" °C")+
+    kv("Day maximum", wb.max.toFixed(1)+" °C")+
     kv("Midday renewable", (r.midday_peak_share*100).toFixed(0)+" %")+
     kv("Buildings", String(CFG.buildings.length))+
     kv("Time step", CFG.simulation.time_step_minutes+" min");
