@@ -25,6 +25,53 @@ restore with staggered recovery → log everything.
 
 ---
 
+## Dashboard
+
+The offline dashboard (`web/dashboard.html`, served by `python server.py`) runs a
+one-shot deterministic simulation and renders a schematic building map, KPI cards,
+time-series charts, per-building flexibility decisions and a full audit timeline.
+
+[![SHIFT dashboard overview — console, schematic district map and portfolio KPI cards](./media/dashboard-overview.png)](./media/dashboard-overview.png)
+
+*Overview: the left console (synthetic conditions, strategy toggles and
+per-building participation/window/door controls), the schematic district map with
+live building statuses, and the portfolio KPI cards (peak reduction, shifted
+energy, rebound ratio, comfort violations, customer savings, audit completeness).*
+
+A time scrubber moves through the simulated day without re-running the model.
+
+[![SHIFT dashboard — time scrubber moving through the simulated day, updating the schematic map, building statuses and chart marker](./media/shift-time-slider-demo.gif)](./media/shift-time-slider-demo.gif)
+
+*Time scrubber: dragging the slider updates each building's indoor temperature,
+heat demand and control status on the schematic map (preheating → reducing →
+recovering) and moves the marker on every chart — no re-simulation.*
+
+[![Outdoor temperature and renewable-share context chart with the event band and scrubber marker](./media/context-chart.png)](./media/context-chart.png)
+
+*Daily context: synthetic outdoor temperature and renewable share. The shaded
+band marks the flexibility event window and the dashed line is the scrubber time.*
+
+[![Aggregated heat demand and selected-building indoor-temperature charts](./media/demand-and-temperature-charts.png)](./media/demand-and-temperature-charts.png)
+
+*Left — aggregated portfolio heat demand, baseline vs SHIFT: reduced during the
+event and returned via staggered recovery. Right — the selected building's indoor
+temperature (SHIFT vs baseline) against its scheduled setpoint and comfort band,
+showing preheating and comfort protection.*
+
+[![Per-building flexibility decisions table and selected-building detail panel](./media/flexibility-decisions-and-detail.png)](./media/flexibility-decisions-and-detail.png)
+
+*Flexibility decisions per building (accept / partial / reject, available and
+committed kW, expected ΔT, heuristic confidence) alongside the detail panel for
+the selected building.*
+
+[![Per-building KPI table and the event and decision audit timeline](./media/per-building-kpis-and-audit.png)](./media/per-building-kpis-and-audit.png)
+
+*Per-building KPIs (baseline vs controlled energy, savings, renewable share,
+delivered flexibility, comfort deviation) and the timestamped audit timeline of
+every signal, decision and command.*
+
+---
+
 ## Quick start
 
 **Primary environment: Linux / Bash.**
