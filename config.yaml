@@ -1,0 +1,225 @@
+# =====================================================================
+# SHIFT — default committed configuration
+# Synthetic pre-pilot district-heating demand-response scenario.
+#
+# EVERYTHING in this file is a SYNTHETIC ASSUMPTION. No real Miesto Gijos
+# data are used. Buildings, coordinates, prices and renewable shares are
+# illustrative and NOT calibrated to real Vilnius buildings.
+#
+# UNITS (used consistently across config, engine, API and dashboard):
+#   temperature .......... deg C
+#   thermal power ........ kW
+#   thermal energy ....... kWh
+#   thermal capacity ..... kWh/degC
+#   heat-loss coeff (UA).. kW/degC
+#   price ................ EUR/MWh  (thermal)
+#   cost_eur = energy_kwh * price_eur_per_mwh / 1000
+# =====================================================================
+
+project:
+  name: shift_prepilot
+  version: "0.1"
+
+simulation:
+  start_time: "2026-01-15 00:00"   # a cold winter day (date is synthetic)
+  horizon_hours: 24
+  time_step_minutes: 2             # matches the pilot's ~2-minute meter resolution
+  rebound_window_minutes: 120      # window after an event used for rebound KPIs
+
+controller:
+  kp_kw_per_c: 6.0                 # proportional gain [kW/degC]
+  default_opening_multiplier: 1.9  # UA multiplier when a window/door is open
+
+# --- Synthetic environment profiles -----------------------------------
+weather:
+  coldest_c: -12.0                 # coldest outdoor temperature [deg C]
+  coldest_hour: 5.0                # hour of day of the coldest point
+  daily_swing_c: 8.0               # peak-to-trough outdoor swing [deg C]
+
+renewable:                         # share of district heat from renewable/waste sources (0..1)
+  base_share: 0.10
+  midday_peak_share: 0.55
+  peak_hour: 13.0
+  spread_hours: 3.5
+
+tariff:                            # time-of-use heat tariff, EUR/MWh thermal
+  default_price_eur_per_mwh: 75.0
+  periods:
+    - {start: "00:00", end: "06:00", price_eur_per_mwh: 55.0}   # night
+    - {start: "06:00", end: "09:00", price_eur_per_mwh: 85.0}   # morning ramp
+    - {start: "09:00", end: "17:00", price_eur_per_mwh: 75.0}   # day
+    - {start: "17:00", end: "21:00", price_eur_per_mwh: 110.0}  # evening peak
+    - {start: "21:00", end: "24:00", price_eur_per_mwh: 70.0}   # late evening
+
+strategy:
+  preheat: true
+  preheat_boost_c: 1.5             # setpoint boost during a price offer, capped at comfort_maximum_c
+  stagger_recovery: true
+  stagger_minutes_by_index: [0, 20, 40, 10, 0, 30]   # per-building recovery hold, by list order
+  recovery_ramp_minutes: 40        # linear ramp back to schedule after the hold
+
+# --- Six synthetic buildings ------------------------------------------
+# map_x / map_y are schematic dashboard coordinates in 0..100 (no geographic meaning).
+buildings:
+  - id: res_north
+    name: "Residential North"
+    building_type: residential
+    map_x: 18
+    map_y: 26
+    floor_area_m2: 4200
+    represented_units: 52
+    represented_occupants: 120
+    thermal_capacity_kwh_per_c: 14.0     # C  [kWh/degC] high mass, well insulated
+    heat_loss_coefficient_kw_per_c: 0.55 # UA [kW/degC]
+    maximum_heat_power_kw: 55.0          # Pmax [kW]
+    non_controllable_heat_kw: 2.0        # uncurtailable base heat [kW]
+    initial_indoor_temperature_c: 21.0
+    scheduled_setpoint: 21.0
+    comfort_minimum_c: 20.0
+    comfort_maximum_c: 23.0
+    setpoint_schedule: []                # empty -> constant scheduled_setpoint all day
+    controllable_share: 0.85
+    flexibility_participation: true
+
+  - id: res_oldtown
+    name: "Residential Old Town"
+    building_type: residential
+    map_x: 70
+    map_y: 22
+    floor_area_m2: 2600
+    represented_units: 28
+    represented_occupants: 62
+    thermal_capacity_kwh_per_c: 5.0      # low mass
+    heat_loss_coefficient_kw_per_c: 1.70 # high heat loss -> limited flexibility
+    maximum_heat_power_kw: 80.0
+    non_controllable_heat_kw: 3.0
+    initial_indoor_temperature_c: 21.0
+    scheduled_setpoint: 21.0
+    comfort_minimum_c: 20.0
+    comfort_maximum_c: 22.5
+    setpoint_schedule: []
+    controllable_share: 0.45
+    flexibility_participation: true
+
+  - id: res_riverside
+    name: "Residential Riverside"
+    building_type: residential
+    map_x: 42
+    map_y: 62
+    floor_area_m2: 3400
+    represented_units: 34
+    represented_occupants: 78
+    thermal_capacity_kwh_per_c: 8.0      # medium
+    heat_loss_coefficient_kw_per_c: 1.05
+    maximum_heat_power_kw: 60.0
+    non_controllable_heat_kw: 2.5
+    initial_indoor_temperature_c: 21.0
+    scheduled_setpoint: 21.0
+    comfort_minimum_c: 20.0
+    comfort_maximum_c: 23.0
+    setpoint_schedule: []
+    controllable_share: 0.60
+    flexibility_participation: true
+
+  - id: business_centre
+    name: "Business Centre"
+    building_type: office
+    map_x: 30
+    map_y: 46
+    floor_area_m2: 6000
+    represented_units: 12
+    represented_occupants: 280
+    thermal_capacity_kwh_per_c: 10.0
+    heat_loss_coefficient_kw_per_c: 0.90
+    maximum_heat_power_kw: 70.0
+    non_controllable_heat_kw: 3.0
+    initial_indoor_temperature_c: 20.0
+    scheduled_setpoint: 21.0
+    comfort_minimum_c: 19.5
+    comfort_maximum_c: 24.0
+    setpoint_schedule:                    # office: warm by day, setback at night
+      - {start: "07:00", end: "19:00", setpoint_c: 21.0}
+      - {start: "19:00", end: "24:00", setpoint_c: 17.0}
+      - {start: "00:00", end: "07:00", setpoint_c: 17.0}
+    controllable_share: 0.70
+    flexibility_participation: true
+
+  - id: admin_building
+    name: "Administration Building"
+    building_type: municipal
+    map_x: 76
+    map_y: 52
+    floor_area_m2: 4800
+    represented_units: 6
+    represented_occupants: 150
+    thermal_capacity_kwh_per_c: 9.0
+    heat_loss_coefficient_kw_per_c: 1.00
+    maximum_heat_power_kw: 65.0
+    non_controllable_heat_kw: 3.0
+    initial_indoor_temperature_c: 21.0
+    scheduled_setpoint: 21.0
+    comfort_minimum_c: 20.0
+    comfort_maximum_c: 23.0
+    setpoint_schedule:
+      - {start: "07:00", end: "18:00", setpoint_c: 21.0}
+      - {start: "18:00", end: "24:00", setpoint_c: 18.0}
+      - {start: "00:00", end: "07:00", setpoint_c: 18.0}
+    controllable_share: 0.0               # not shiftable
+    flexibility_participation: false      # flexibility participation DISABLED
+
+  - id: municipal_school
+    name: "Municipal School"
+    building_type: school
+    map_x: 54
+    map_y: 36
+    floor_area_m2: 5200
+    represented_units: 1
+    represented_occupants: 400
+    thermal_capacity_kwh_per_c: 7.0
+    heat_loss_coefficient_kw_per_c: 1.15
+    maximum_heat_power_kw: 70.0
+    non_controllable_heat_kw: 3.5
+    initial_indoor_temperature_c: 21.0
+    scheduled_setpoint: 21.0
+    comfort_minimum_c: 20.5               # tight comfort band -> limited, partial acceptance
+    comfort_maximum_c: 22.0
+    setpoint_schedule:                    # occupied into the evening (after-school use)
+      - {start: "07:00", end: "20:00", setpoint_c: 21.0}
+      - {start: "20:00", end: "24:00", setpoint_c: 20.5}
+      - {start: "00:00", end: "07:00", setpoint_c: 20.5}
+    controllable_share: 0.50
+    flexibility_participation: true
+
+# --- Operator / network events (all timestamped, all audited) ---------
+events:
+  # High-renewable, discounted price offer -> suitable buildings preheat.
+  - type: PRICE_OFFER
+    received_time: "13:30"
+    start_time: "14:00"
+    duration_minutes: 180
+    price_eur_per_mwh: 30.0
+    customer_incentive_eur_per_mwh: 5.0
+    renewable_share_override: 0.80
+    target: portfolio
+
+  # Evening portfolio peak-reduction request.
+  - type: PEAK_REDUCTION_REQUEST
+    received_time: "17:30"
+    start_time: "18:00"
+    duration_minutes: 120
+    requested_reduction_kw: 40.0
+    maximum_rebound_ratio: 0.8
+    customer_incentive_eur_per_mwh: 8.0
+    target: portfolio
+
+  # A window left open at Riverside during the event -> reduced flexibility.
+  - type: WINDOW_OPEN
+    building_id: res_riverside
+    start_time: "18:00"
+    duration_minutes: 90
+    heat_loss_multiplier: 1.9
+
+kpi_targets:
+  peak_reduction_pct: 10.0
+  max_comfort_deviation_c: 1.0
+  max_rebound_ratio: 0.8

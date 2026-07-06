@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHIFT — Pre-pilot flexibility simulator</title>
+<style>
+  :root{
+    --ink:#132029; --ink-soft:#41545f; --paper:#eef2f3; --card:#ffffff;
+    --line:#d2dbe0; --line-soft:#e5ebee;
+    --cold:#1f8fd6; --heat:#e08533; --dr:#c0392b; --ren:#3f9d5a;
+    --purple:#8e44ad; --ghost:#9aa9b2; --ok:#2e7d55; --warn:#b8532f;
+    --mono:ui-monospace,"JetBrains Mono","Menlo",monospace;
+    --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  header{background:var(--ink);color:#eaf1f4;padding:18px 26px 20px;border-bottom:3px solid var(--heat)}
+  header .eyebrow{color:#7fa7bb}
+  header h1{margin:6px 0 4px;font-size:21px;font-weight:650}
+  header p{margin:0;color:#a9c0cc;max-width:80ch;font-size:13px}
+  .chip{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10.5px;color:#0e1a22;
+    background:#e7b47a;border-radius:2px;padding:4px 8px;font-weight:600}
+  .wrap{display:grid;grid-template-columns:300px 1fr;align-items:start}
+  @media(max-width:960px){.wrap{grid-template-columns:1fr}}
+  aside{background:var(--card);border-right:1px solid var(--line);padding:16px 18px 28px;position:sticky;top:0}
+  @media(max-width:960px){aside{position:static;border-right:none;border-bottom:1px solid var(--line)}}
+  main{padding:18px 22px 48px;min-width:0}
+  .group{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
+  .group h2{font-size:11px;margin:0 0 10px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .kv{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);display:flex;justify-content:space-between;margin:3px 0}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;margin-bottom:6px;user-select:none}
+  .toggle input{accent-color:var(--heat);width:15px;height:15px}
+  .brow{border:1px solid var(--line);border-radius:4px;padding:7px 8px;margin-bottom:6px}
+  .brow .nm{font-weight:600;font-size:12px}
+  .brow .sub{font-family:var(--mono);font-size:10px;color:var(--ink-soft)}
+  .brow .flags{display:flex;gap:10px;margin-top:5px;flex-wrap:wrap}
+  .brow label{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);cursor:pointer}
+  .btns{display:flex;gap:8px;margin-top:6px}
+  button{font-family:var(--sans);font-size:12.5px;border:1px solid var(--ink);background:var(--ink);color:#fff;
+    border-radius:3px;padding:8px 12px;cursor:pointer;font-weight:550}
+  button.ghost{background:#fff;color:var(--ink)}
+  button:hover{opacity:.9}
+  button:disabled{opacity:.5;cursor:default}
+  /* map */
+  .mapwrap{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:12px 14px;margin-bottom:14px}
+  .maphead{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .maphead h3{margin:0;font-size:14px}
+  .scrub{display:flex;align-items:center;gap:10px;flex:1;min-width:240px}
+  .scrub input{flex:1;accent-color:var(--heat)}
+  .scrub .t{font-family:var(--mono);font-size:12px;color:var(--heat);font-weight:600;min-width:52px}
+  .map{position:relative;width:100%;aspect-ratio:16/7;background:
+    linear-gradient(0deg,#eef4f6,#f7fafb);border:1px solid var(--line-soft);border-radius:4px;overflow:hidden}
+  .node{position:absolute;transform:translate(-50%,-50%);width:15%;min-width:120px;
+    border-radius:6px;border:2px solid var(--line);background:#fff;padding:6px 8px;cursor:pointer;
+    box-shadow:0 1px 3px rgba(20,40,60,.08);transition:box-shadow .1s}
+  .node:hover{box-shadow:0 2px 8px rgba(20,40,60,.22)}
+  .node.sel{outline:2px solid var(--ink);outline-offset:1px}
+  .node .n{font-weight:650;font-size:11.5px;line-height:1.15}
+  .node .ty{font-family:var(--mono);font-size:9px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+  .node .m{font-family:var(--mono);font-size:10px;margin-top:3px;display:flex;justify-content:space-between}
+  .node .bar{height:4px;border-radius:2px;background:var(--line-soft);margin-top:4px;overflow:hidden}
+  .node .bar i{display:block;height:100%;background:var(--cold)}
+  .badge{display:inline-block;font-family:var(--mono);font-size:8.5px;text-transform:uppercase;letter-spacing:.03em;
+    padding:1px 5px;border-radius:8px;margin-top:4px;font-weight:700}
+  /* status colours */
+  .st-normal{border-color:#c7d2d8} .b-normal{background:#eef2f4;color:#55666f}
+  .st-preheating{border-color:var(--heat)} .b-preheating{background:#f6dcc0;color:#8a4d18}
+  .st-reducing{border-color:var(--cold)} .b-reducing{background:#c9e6f6;color:#155d8c}
+  .st-recovering{border-color:var(--purple)} .b-recovering{background:#e7d3f0;color:#63277f}
+  .st-comfort_constrained{border-color:var(--dr)} .b-comfort_constrained{background:#f3c9c4;color:#8e2318}
+  .st-window_open{border-color:#d9a441} .b-window_open{background:#f3e2ba;color:#7a5a11}
+  .st-door_open{border-color:#d9a441} .b-door_open{background:#f3e2ba;color:#7a5a11}
+  .st-non_participating{border-color:#b9c4ca;background:repeating-linear-gradient(45deg,#fff,#fff 6px,#f1f4f6 6px,#f1f4f6 12px)}
+  .b-non_participating{background:#e3e9ec;color:#5a6a72}
+  .st-fault{border-color:#7a1f16} .b-fault{background:#e3b7b1;color:#5f160d}
+  /* kpi */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:14px}
+  @media(max-width:1150px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:10px 11px;border-top:2px solid var(--heat)}
+  .kpi .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+  .kpi .v{font-family:var(--mono);font-size:20px;font-weight:650;margin-top:2px}
+  .kpi .u{font-size:11px;color:var(--ink-soft)}
+  .kpi.good{border-top-color:var(--ok)} .kpi.good .v{color:var(--ok)}
+  .kpi.bad{border-top-color:var(--warn)} .kpi.bad .v{color:var(--warn)}
+  .chart{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:12px 14px 8px;margin-top:14px}
+  .chart h3{margin:0 0 2px;font-size:13.5px}
+  .chart .sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:right;padding:5px 7px;border-bottom:1px solid var(--line-soft)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600}
+  .dec{font-family:var(--mono);font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px}
+  .dec.accept{background:#cdeadb;color:#1c6b45} .dec.partial{background:#f6e6c2;color:#8a6013}
+  .dec.reject{background:#f0cfca;color:#8e2c20}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:12px 14px;margin-top:14px}
+  .panel h3{margin:0 0 8px;font-size:13.5px}
+  .audit{max-height:280px;overflow:auto;font-family:var(--mono);font-size:11px}
+  .audit .row{display:grid;grid-template-columns:96px 74px 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-soft)}
+  .audit .cat{text-transform:uppercase;font-size:9px;font-weight:700;align-self:center}
+  .cat.signal{color:var(--cold)} .cat.decision{color:var(--heat)} .cat.command{color:var(--purple)} .cat.outcome{color:var(--ok)}
+  .detail dl{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin:0;font-family:var(--mono);font-size:11.5px}
+  .detail dt{color:var(--ink-soft)} .detail dd{margin:0;text-align:right;font-weight:600}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--ink-soft);margin-top:6px}
+  .legend span{display:flex;align-items:center;gap:5px}
+  .legend i{width:11px;height:11px;border-radius:3px;border:2px solid}
+  .note{font-size:11px;color:var(--ink-soft);font-family:var(--mono);margin-top:6px}
+  #status{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);margin-top:6px}
+  footer{padding:16px 26px 30px;color:var(--ink-soft);font-size:11px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">SHIFT · Smart Heat Interoperability &amp; Flexibility Technology</div>
+  <h1>Pre-pilot flexibility simulator</h1>
+  <p>Synthetic six-building district-heating portfolio. Verifies the thermal-balance, flexibility-assessment,
+     comfort and rebound logic — and the KPI calculations — before substation connection. Baseline and
+     SHIFT run in parallel from identical initial conditions.</p>
+  <span class="chip">SYNTHETIC · 1R1C space heating · no real Miesto Gijos data · verifies control &amp; KPI logic · not TRL 7 evidence</span>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="group">
+      <h2>Conditions (synthetic)</h2>
+      <div id="conditions"></div>
+    </div>
+    <div class="group">
+      <h2>Strategy</h2>
+      <label class="toggle"><input type="checkbox" id="preheat" checked> Preheat on price offer</label>
+      <label class="toggle"><input type="checkbox" id="stagger" checked> Stagger recovery (anti-rebound)</label>
+    </div>
+    <div class="group">
+      <h2>Buildings</h2>
+      <div id="bcontrols"></div>
+    </div>
+    <div class="btns">
+      <button id="run">Run simulation</button>
+      <button class="ghost" id="reset">Reset</button>
+    </div>
+    <div id="status">loading configuration…</div>
+  </aside>
+
+  <main>
+    <div class="mapwrap">
+      <div class="maphead">
+        <h3>District portfolio — schematic map</h3>
+        <div class="scrub">
+          <span class="t" id="clock">--:--</span>
+          <input type="range" id="time" min="0" max="0" value="0" step="1">
+        </div>
+      </div>
+      <div class="map" id="map"></div>
+      <div class="legend">
+        <span><i class="st-normal"></i>normal</span>
+        <span><i class="st-preheating"></i>preheating</span>
+        <span><i class="st-reducing"></i>reducing</span>
+        <span><i class="st-recovering"></i>recovering</span>
+        <span><i class="st-comfort_constrained"></i>comfort</span>
+        <span><i class="st-window_open"></i>window/door</span>
+        <span><i class="st-non_participating"></i>non-participating</span>
+        <span><i class="st-fault"></i>fault</span>
+      </div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="cols">
+      <div class="chart"><h3>Outdoor temperature &amp; renewable share</h3>
+        <div class="sub">Daily context. Shaded band = flexibility event; marker = scrubber time.</div>
+        <canvas id="cCtx" height="150"></canvas></div>
+      <div class="chart"><h3>Aggregated heat demand</h3>
+        <div class="sub">Baseline vs SHIFT. Reduced during the event, staggered recovery afterwards.</div>
+        <canvas id="cDem" height="150"></canvas></div>
+    </div>
+
+    <div class="chart"><h3>Indoor temperature — comfort protection</h3>
+      <div class="sub">SHIFT per building (solid). Select a building to compare its baseline (dashed) and comfort band.</div>
+      <canvas id="cTin" height="170"></canvas></div>
+
+    <div class="cols">
+      <div class="panel"><h3>Flexibility decisions (per building)</h3>
+        <div style="overflow-x:auto"><table id="decisions"></table></div>
+        <div class="note">Confidence is a heuristic simulator score (0–1), not calibrated prediction confidence.</div>
+      </div>
+      <div class="panel detail"><h3 id="detailName">Building detail</h3>
+        <div id="detail"></div>
+      </div>
+    </div>
+
+    <div class="panel"><h3>Per-building KPIs</h3>
+      <div style="overflow-x:auto"><table id="pbkpi"></table></div>
+    </div>
+
+    <div class="panel"><h3>Event &amp; decision audit timeline</h3>
+      <div class="audit" id="audit"></div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  Illustrative lumped-parameter (1R1C) space-heating model for logic and KPI verification only.
+  Prices (EUR/MWh) and renewable shares are synthetic assumptions; the baseline is an exact simulated
+  counterfactual. SHIFT · High Performance Creators Ltd.
+</footer>
+
+<script src="/chart.js"></script>
+<script>
+"use strict";
+var CFG=null, DATA=null, SEL=null, IDX=0;
+var CH={};
+
+var COLORS=["#e08533","#1f8fd6","#8e44ad","#3f9d5a","#c0392b","#2b6f8c"];
+var el=function(id){return document.getElementById(id)};
+function fmt(v,d){return (typeof v==="number")?v.toFixed(d==null?1:d):v;}
+function statusClass(s){return "st-"+s;}
+
+// ---------- boot ----------
+fetch("/config").then(function(r){return r.json();}).then(function(cfg){
+  CFG=cfg; buildConsole(); el("status").textContent="ready — press Run simulation."; run();
+}).catch(function(e){el("status").textContent="config error: "+e;});
+
+function buildConsole(){
+  var w=CFG.weather, r=CFG.renewable;
+  el("conditions").innerHTML=
+    kv("Coldest outdoor", w.coldest_c.toFixed(1)+" °C")+
+    kv("Daily swing", w.daily_swing_c.toFixed(1)+" °C")+
+    kv("Midday renewable", (r.midday_peak_share*100).toFixed(0)+" %")+
+    kv("Buildings", String(CFG.buildings.length))+
+    kv("Time step", CFG.simulation.time_step_minutes+" min");
+  el("preheat").checked = CFG.strategy.preheat!==false;
+  el("stagger").checked = CFG.strategy.stagger_recovery!==false;
+
+  var html="";
+  CFG.buildings.forEach(function(b){
+    html+='<div class="brow"><div class="nm">'+b.name+'</div>'+
+      '<div class="sub">'+b.building_type+' · C='+b.thermal_capacity_kwh_per_c+' · UA='+b.heat_loss_coefficient_kw_per_c+'</div>'+
+      '<div class="flags">'+
+        '<label><input type="checkbox" class="part" data-id="'+b.id+'"'+(b.flexibility_participation?' checked':'')+'> participate</label>'+
+        '<label><input type="checkbox" class="win" data-id="'+b.id+'"> window</label>'+
+        '<label><input type="checkbox" class="door" data-id="'+b.id+'"> door</label>'+
+      '</div></div>';
+  });
+  el("bcontrols").innerHTML=html;
+}
+function kv(k,v){return '<div class="kv"><span>'+k+'</span><span>'+v+'</span></div>';}
+
+el("run").addEventListener("click",run);
+el("reset").addEventListener("click",function(){
+  document.querySelectorAll(".part").forEach(function(c){c.checked=true;});
+  document.querySelectorAll(".win,.door").forEach(function(c){c.checked=false;});
+  el("preheat").checked=true; el("stagger").checked=true; run();
+});
+el("time").addEventListener("input",function(){IDX=+el("time").value; renderScrub();});
+
+function gather(){
+  var participation={}, mw={}, md={};
+  document.querySelectorAll(".part").forEach(function(c){participation[c.dataset.id]=c.checked;});
+  document.querySelectorAll(".win").forEach(function(c){if(c.checked)mw[c.dataset.id]=true;});
+  document.querySelectorAll(".door").forEach(function(c){if(c.checked)md[c.dataset.id]=true;});
+  return {participation:participation, manual_window:mw, manual_door:md,
+    overrides:{strategy:{preheat:el("preheat").checked, stagger_recovery:el("stagger").checked}}};
+}
+
+function run(){
+  el("run").disabled=true; el("status").textContent="simulating…";
+  fetch("/simulate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(gather())})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.error){throw new Error(d.error);} DATA=d; onData(); el("status").textContent="done."; })
+    .catch(function(e){el("status").textContent="error: "+e.message;})
+    .finally(function(){el("run").disabled=false;});
+}
+
+function onData(){
+  var n=DATA.shift.hours.length;
+  var slider=el("time"); slider.max=n-1;
+  // default scrubber to the middle of the first event window
+  IDX=Math.floor(n/2);
+  if(DATA.request_windows && DATA.request_windows.length){
+    var dt=DATA.shift.hours[1]-DATA.shift.hours[0];
+    var w=DATA.request_windows[0]; IDX=Math.round(((w.start_h+w.end_h)/2)/dt);
+  }
+  slider.value=IDX;
+  renderKPIs(); renderCharts(); renderDecisions(); renderPBKpi(); renderAudit();
+  if(!SEL) SEL=DATA.map_state[0].id;
+  renderScrub();
+}
+
+// ---------- KPI cards ----------
+function renderKPIs(){
+  var p=DATA.portfolio_kpis;
+  var cards=[
+    ["Peak reduction",fmt(p.peak_reduction_kw,1),"kW","good"],
+    ["Peak reduction",fmt(p.peak_reduction_pct,1),"%",p.peak_reduction_pct>=10?"good":""],
+    ["Shifted energy",fmt(p.shifted_thermal_energy_kwh,1),"kWh",""],
+    ["Rebound ratio",fmt(p.rebound_ratio,2),"×",p.rebound_ratio>0.8?"bad":"good"],
+    ["Comfort violations",String(p.comfort_violations),"",p.comfort_violations>0?"bad":"good"],
+    ["Customer savings",fmt(p.total_customer_savings_eur,2),"EUR",p.total_customer_savings_eur>=0?"good":"bad"],
+    ["Renewable increase",fmt(p.renewable_thermal_energy_increase_kwh,1),"kWh","good"],
+    ["Accepted / partial / rejected",p.requests_accepted+" / "+p.requests_partial+" / "+p.requests_rejected,"",""],
+    ["Baseline peak",fmt(p.baseline_peak_demand_kw,1),"kW",""],
+    ["Controlled peak",fmt(p.controlled_peak_demand_kw,1),"kW",""],
+    ["Rebound energy",fmt(p.rebound_energy_kwh,1),"kWh",""],
+    ["Audit completeness",fmt(p.audit_completeness_pct,0),"%",p.audit_completeness_pct>=100?"good":"bad"]
+  ];
+  el("kpis").innerHTML=cards.map(function(c){
+    return '<div class="kpi '+(c[3]||'')+'"><div class="k">'+c[0]+'</div><div class="v">'+c[1]+
+      ' <span class="u">'+c[2]+'</span></div></div>';
+  }).join("");
+}
+
+// ---------- charts ----------
+var eventBandPlugin={id:"eventBand",beforeDraw:function(c){
+  if(!DATA||!DATA.request_windows||!DATA.request_windows.length)return;
+  var w=DATA.request_windows[0], xa=c.scales.x, ya=c.chartArea; if(!xa)return;
+  var x0=xa.getPixelForValue(w.start_h), x1=xa.getPixelForValue(w.end_h);
+  var ctx=c.ctx; ctx.save(); ctx.fillStyle="rgba(224,133,51,.09)";
+  ctx.fillRect(x0,ya.top,x1-x0,ya.bottom-ya.top);
+  // scrubber marker
+  var hx=xa.getPixelForValue(DATA.shift.hours[IDX]);
+  ctx.strokeStyle="rgba(19,32,41,.55)"; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(hx,ya.top); ctx.lineTo(hx,ya.bottom); ctx.stroke(); ctx.restore();
+}};
+if(window.Chart) Chart.register(eventBandPlugin);
+
+function baseOpts(yTitle,y2){
+  var o={responsive:true,maintainAspectRatio:false,animation:false,
+    interaction:{mode:"nearest",intersect:false},
+    plugins:{legend:{display:true,labels:{boxWidth:10,font:{size:10}}}},
+    scales:{x:{type:"linear",min:0,max:24,ticks:{stepSize:4,font:{size:10}},title:{display:true,text:"hour"}},
+            y:{title:{display:true,text:yTitle},ticks:{font:{size:10}}}}};
+  if(y2)o.scales.y2={position:"right",min:0,max:1,grid:{drawOnChartArea:false},title:{display:true,text:"renewable share"}};
+  return o;
+}
+function pts(xs,ys){return xs.map(function(x,i){return {x:x,y:ys[i]};});}
+
+function renderCharts(){
+  var H=DATA.shift.hours;
+  // context
+  mk("cCtx","cCtx",{datasets:[
+      {label:"outdoor °C",data:pts(H,DATA.shift.t_out),borderColor:"#1f8fd6",borderWidth:2,pointRadius:0,yAxisID:"y"},
+      {label:"renewable share",data:pts(H,DATA.shift.renewable_share),borderColor:"#3f9d5a",borderWidth:1.6,pointRadius:0,yAxisID:"y2"}
+    ]}, baseOpts("°C",true));
+  // demand
+  mk("cDem","cDem",{datasets:[
+      {label:"baseline",data:pts(H,DATA.baseline.aggregated_demand_kw),borderColor:"#9aa9b2",borderWidth:1.6,borderDash:[5,4],pointRadius:0},
+      {label:"SHIFT",data:pts(H,DATA.shift.aggregated_demand_kw),borderColor:"#e08533",borderWidth:2.2,pointRadius:0}
+    ]}, baseOpts("heat demand kW",false));
+  renderTin();
+}
+function renderTin(){
+  var H=DATA.shift.hours, ds=[];
+  DATA.map_state.forEach(function(b,i){
+    var faded=SEL&&b.id!==SEL;
+    ds.push({label:b.name,data:pts(H,DATA.shift.per_building[b.id].tin),
+      borderColor:COLORS[i%COLORS.length],borderWidth:faded?1:2.2,pointRadius:0,
+      borderCapStyle:"round",hidden:false,opacity:1,
+      segment:{},order:faded?2:1});
+    if(faded)ds[ds.length-1].borderColor=hexA(COLORS[i%COLORS.length],.28);
+  });
+  if(SEL){
+    var b=cfgB(SEL);
+    ds.push({label:"baseline("+shortName(SEL)+")",data:pts(H,DATA.baseline.per_building[SEL].tin),
+      borderColor:"#41545f",borderWidth:1.4,borderDash:[5,3],pointRadius:0,order:0});
+    ds.push({label:"comfort min",data:pts([0,24],[b.comfort_minimum_c,b.comfort_minimum_c]),
+      borderColor:"#c0392b",borderWidth:1,borderDash:[2,3],pointRadius:0,order:0});
+    ds.push({label:"comfort max",data:pts([0,24],[b.comfort_maximum_c,b.comfort_maximum_c]),
+      borderColor:"#c0392b",borderWidth:1,borderDash:[2,3],pointRadius:0,order:0});
+  }
+  mk("cTin","cTin",{datasets:ds}, baseOpts("indoor °C",false));
+}
+function mk(key,canvasId,data,opts){
+  if(CH[key]){CH[key].data=data; CH[key].options=opts; CH[key].update(); return;}
+  CH[key]=new Chart(el(canvasId).getContext("2d"),{type:"line",data:data,options:opts});
+}
+function hexA(hex,a){var n=parseInt(hex.slice(1),16);return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";}
+function cfgB(id){return CFG.buildings.filter(function(b){return b.id===id;})[0];}
+function shortName(id){return cfgB(id).name.split(" ")[0];}
+
+// ---------- decisions & KPI tables ----------
+function decCell(d){return '<span class="dec '+d+'">'+d+'</span>';}
+function renderDecisions(){
+  var rows='<tr><th>Building</th><th>decision</th><th>avail kW</th><th>committed kW</th><th>Δ°C</th><th>conf</th></tr>';
+  DATA.map_state.forEach(function(b){
+    var e=DATA.envelopes[b.id];
+    rows+='<tr><td>'+b.name+'</td><td style="text-align:right">'+decCell(e.decision)+'</td>'+
+      '<td>'+fmt(e.available_kw,1)+'</td><td>'+fmt(e.committed_kw,1)+'</td>'+
+      '<td>'+fmt(e.expected_delta_t_c,2)+'</td><td>'+fmt(e.confidence,2)+'</td></tr>';
+  });
+  el("decisions").innerHTML=rows;
+}
+function renderPBKpi(){
+  var rows='<tr><th>Building</th><th>base kWh</th><th>ctrl kWh</th><th>save EUR</th><th>renew %</th>'+
+    '<th>deliv kW</th><th>dev °C</th></tr>';
+  DATA.per_building_kpis.forEach(function(b){
+    rows+='<tr><td>'+b.name+'</td><td>'+fmt(b.baseline_thermal_energy_kwh,0)+'</td>'+
+      '<td>'+fmt(b.controlled_thermal_energy_kwh,0)+'</td><td>'+fmt(b.customer_savings_eur,2)+'</td>'+
+      '<td>'+fmt(b.renewable_share_pct,0)+'</td><td>'+fmt(b.delivered_flexibility_kw,1)+'</td>'+
+      '<td>'+fmt(b.comfort_deviation_c,2)+'</td></tr>';
+  });
+  el("pbkpi").innerHTML=rows;
+}
+function renderAudit(){
+  el("audit").innerHTML=DATA.audit.map(function(a){
+    return '<div class="row"><span>'+a.timestamp.slice(11)+'</span>'+
+      '<span class="cat '+a.category+'">'+a.category+'</span><span>'+a.message+'</span></div>';
+  }).join("");
+}
+
+// ---------- scrubber-driven map & detail ----------
+function renderScrub(){
+  var H=DATA.shift.hours, h=H[IDX];
+  el("clock").textContent=hhmm(h);
+  renderMap(); renderDetail();
+  ["cCtx","cDem","cTin"].forEach(function(k){if(CH[k])CH[k].update("none");});
+}
+function hhmm(h){var m=Math.round(h*60),H2=Math.floor(m/60)%24,M=m%60;return (H2<10?"0":"")+H2+":"+(M<10?"0":"")+M;}
+
+function renderMap(){
+  var mp=el("map"); mp.innerHTML="";
+  DATA.map_state.forEach(function(b){
+    var pb=DATA.shift.per_building[b.id];
+    var st=pb.status[IDX], tin=pb.tin[IDX], q=pb.q[IDX];
+    var e=DATA.envelopes[b.id];
+    var n=document.createElement("div");
+    n.className="node "+statusClass(st)+(SEL===b.id?" sel":"");
+    n.style.left=b.map_x+"%"; n.style.top=b.map_y+"%";
+    var frac=Math.max(0,Math.min(1,q/(cfgB(b.id).maximum_heat_power_kw)));
+    n.innerHTML='<div class="ty">'+b.building_type+'</div><div class="n">'+b.name+'</div>'+
+      '<div class="m"><span>'+tin.toFixed(1)+' °C</span><span>'+q.toFixed(0)+' kW</span></div>'+
+      '<div class="bar"><i style="width:'+(frac*100).toFixed(0)+'%"></i></div>'+
+      '<span class="badge b-'+st+'">'+st.replace(/_/g," ")+'</span>';
+    n.addEventListener("click",function(){SEL=b.id; renderTin(); renderScrub();});
+    mp.appendChild(n);
+  });
+}
+function renderDetail(){
+  if(!SEL)return;
+  var b=cfgB(SEL), pb=DATA.shift.per_building[SEL], e=DATA.envelopes[SEL];
+  var k=null; DATA.per_building_kpis.forEach(function(x){if(x.id===SEL)k=x;});
+  el("detailName").textContent=b.name+" — detail";
+  el("detail").innerHTML='<dl>'+
+    dd("Type",b.building_type)+dd("Units / occupants",b.represented_units+" / "+b.represented_occupants)+
+    dd("Floor area",b.floor_area_m2+" m²")+
+    dd("C / UA",b.thermal_capacity_kwh_per_c+" kWh/°C / "+b.heat_loss_coefficient_kw_per_c+" kW/°C")+
+    dd("Comfort band",b.comfort_minimum_c+"–"+b.comfort_maximum_c+" °C")+
+    dd("Controllable share",(b.controllable_share*100).toFixed(0)+" %")+
+    dd("Status @ "+hhmm(DATA.shift.hours[IDX]),pb.status[IDX].replace(/_/g," "))+
+    dd("Indoor now",pb.tin[IDX].toFixed(1)+" °C")+
+    dd("Heat demand now",pb.q[IDX].toFixed(1)+" kW")+
+    dd("Decision",e.decision)+
+    dd("Available / committed",fmt(e.available_kw,1)+" / "+fmt(e.committed_kw,1)+" kW")+
+    dd("Delivered flexibility",k?fmt(k.delivered_flexibility_kw,1)+" kW":"—")+
+    dd("Customer savings",k?fmt(k.customer_savings_eur,2)+" EUR":"—")+
+    dd("Comfort deviation",k?fmt(k.comfort_deviation_c,2)+" °C":"—")+
+    '</dl>';
+}
+function dd(k,v){return '<dt>'+k+'</dt><dd>'+v+'</dd>';}
+</script>
+</body>
+</html>

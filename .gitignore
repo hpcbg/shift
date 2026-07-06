@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+.venv/
+venv/
+
+node_modules/
+dist/
+build/
+
+.env
+.env.*
+*.log
+
+# SHIFT — machine-local config override (never committed)
+config.local.yaml
+
+.DS_Store
+.idea/
+.vscode/
+.claude
+
+# Temporal files
+references
+prototype

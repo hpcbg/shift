@@ -1,0 +1,30 @@
+# =====================================================================
+# SHIFT — local override template
+#
+# Copy this file to  config.local.yaml  (git-ignored) to override any value
+# in config.yaml on your machine WITHOUT editing the committed defaults.
+# Values are deep-merged onto config.yaml: you only specify what you change.
+#
+# All units and the EUR/MWh price convention are identical to config.yaml.
+# =====================================================================
+
+# Example: run a faster/coarser simulation while developing.
+# simulation:
+#   time_step_minutes: 5
+
+# Example: make the evening peak-reduction request more aggressive.
+# events:
+#   - type: PEAK_REDUCTION_REQUEST
+#     received_time: "17:30"
+#     start_time: "18:00"
+#     duration_minutes: 120
+#     requested_reduction_kw: 55.0
+#     maximum_rebound_ratio: 0.8
+#     target: portfolio
+
+# Example: disable preheating to compare strategies.
+# strategy:
+#   preheat: false
+
+# NOTE: because lists are replaced (not merged element-wise), if you override
+# `events:` or `buildings:` you must provide the COMPLETE list you want.
