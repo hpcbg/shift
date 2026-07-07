@@ -116,8 +116,8 @@ vendored offline in `web/chart.umd.js`.
 | Administration Building | municipal | **participation disabled** | **reject** |
 | Municipal School | school | tight comfort band | comfort-limited → **partial** |
 
-Weather: a **synthetic "Ljubljana-inspired cold winter day"** hourly outdoor
-temperature (night minimum ≈ −5 °C around 05:00–06:00, daytime maximum ≈ +3 °C
+Weather: a **synthetic "Vilnius-inspired cold winter day"** hourly outdoor
+temperature (night minimum ≈ −7 °C around 06:00, daytime maximum ≈ −2 °C
 around 15:00), linearly interpolated at the 2-minute step. It is not a measured
 average and can be swapped for measured or forecast data (see
 [Weather profile](#weather-profile)).
@@ -145,11 +145,11 @@ python -m shift_sim
 
 | KPI | Default scenario result |
 |---|---:|
-| Peak reduction | 24.5 kW / 17.4% |
-| Shifted thermal energy | 49.0 kWh |
+| Peak reduction | 26.3 kW / 15.4% |
+| Shifted thermal energy | 48.2 kWh |
 | Rebound ratio | 0.22×, target ≤ 0.8 |
-| Renewable thermal-energy increase | +38.3 kWh |
-| Total customer savings | +€5.14 |
+| Renewable thermal-energy increase | +38.4 kWh |
+| Total customer savings | +€5.11 |
 | Flexibility decisions | 1 accepted / 4 partial / 1 rejected |
 | Comfort violations | 0 |
 | Audit completeness | 100% |
@@ -159,9 +159,9 @@ Residential Riverside, Business Centre and Municipal School partially accept
 the request. Administration Building rejects it because flexibility
 participation is disabled.
 
-The simulated portfolio reduces the selected peak by **17.4%** without
+The simulated portfolio reduces the selected peak by **15.4%** without
 violating the configured comfort limits. Preheating during the low-price,
-higher-renewable period shifts **38.3 kWh** of thermal consumption into a
+higher-renewable period shifts **38.4 kWh** of thermal consumption into a
 higher-renewable period, while staggered recovery keeps the rebound ratio at
 **0.22**.
 
@@ -207,7 +207,7 @@ Single cost formula, used everywhere: `cost_eur = energy_kwh * price_eur_per_mwh
 ### Weather profile
 
 Outdoor temperature is a **synthetic** hourly profile under `weather.hourly_temperature_c`
-— a representative cold winter day (the default is *"Ljubljana-inspired cold
+— a representative cold winter day (the default is *"Vilnius-inspired cold
 winter day"*), **not** a measured hourly average. The engine linearly
 interpolates between the ordered `{hour, value}` points at the 2-minute step
 (hours must be strictly increasing, values finite, and cover hour 0 through 24).

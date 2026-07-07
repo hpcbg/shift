@@ -20,27 +20,27 @@ def _profiles():
 # ── exact configured values ───────────────────────────────────────────────────
 def test_exact_values_at_configured_hours():
     p = _profiles()
-    assert p.outdoor_temp_c(0.0) == pytest.approx(-3.3)
-    assert p.outdoor_temp_c(5.0) == pytest.approx(-5.0)
-    assert p.outdoor_temp_c(15.0) == pytest.approx(3.0)
-    assert p.outdoor_temp_c(24.0) == pytest.approx(-3.3)
+    assert p.outdoor_temp_c(0.0) == pytest.approx(-5.0)
+    assert p.outdoor_temp_c(5.0) == pytest.approx(-6.9)
+    assert p.outdoor_temp_c(15.0) == pytest.approx(-2.1)
+    assert p.outdoor_temp_c(24.0) == pytest.approx(-5.0)
 
 
 # ── linear interpolation ──────────────────────────────────────────────────────
 def test_linear_interpolation_half_hours():
     p = _profiles()
-    # 00:00 -3.3 -> 01:00 -3.7  => 00:30 = -3.5
-    assert p.outdoor_temp_c(0.5) == pytest.approx(-3.5)
-    # 14:00 2.8 -> 15:00 3.0     => 14:30 = 2.9
-    assert p.outdoor_temp_c(14.5) == pytest.approx(2.9)
-    # 05:00 -5.0 -> 06:00 -5.0   => flat 05:30 = -5.0
-    assert p.outdoor_temp_c(5.5) == pytest.approx(-5.0)
+    # 00:00 -5.0 -> 01:00 -5.4  => 00:30 = -5.2
+    assert p.outdoor_temp_c(0.5) == pytest.approx(-5.2)
+    # 14:00 -2.4 -> 15:00 -2.1   => 14:30 = -2.25
+    assert p.outdoor_temp_c(14.5) == pytest.approx(-2.25)
+    # 05:00 -6.9 -> 06:00 -7.1   => 05:30 = -7.0
+    assert p.outdoor_temp_c(5.5) == pytest.approx(-7.0)
 
 
 def test_interpolation_at_two_minute_steps_is_between_neighbours():
     p = _profiles()
-    # between hour 10 (-1.1) and hour 11 (0.2), values must stay within [-1.1, 0.2]
-    lo, hi = -1.1, 0.2
+    # between hour 10 (-5.5) and hour 11 (-4.7), values must stay within [-5.5, -4.7]
+    lo, hi = -5.5, -4.7
     for k in range(0, 31):
         t = 10.0 + k * (2 / 60.0)
         v = p.outdoor_temp_c(t)
@@ -51,8 +51,8 @@ def test_interpolation_at_two_minute_steps_is_between_neighbours():
 def test_bounds_derived_correctly():
     p = _profiles()
     lo, hi = p.outdoor_temp_bounds()
-    assert lo == pytest.approx(-5.0)
-    assert hi == pytest.approx(3.0)
+    assert lo == pytest.approx(-7.1)
+    assert hi == pytest.approx(-2.1)
 
 
 # ── validation of invalid profiles ────────────────────────────────────────────
